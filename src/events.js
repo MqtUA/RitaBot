@@ -9,7 +9,7 @@ const auth = require("./core/auth");
 const logger = require("./core/logger");
 const messageHandler = require("./message");
 const db = require("./core/db");
-const setStatus = require("./core/status");
+// Const setStatus = require("./core/status");
 const react = require("./commands/translation_commands/translate.react");
 const botVersion = require("../package.json").version;
 const botCreator = "Collaboration";
@@ -92,11 +92,13 @@ exports.listen = function listen (client)
          ${client.users.cache.size.toLocaleString()} users
       `);
 
-         setStatus(
-            client.user,
-            "online",
-            config
-         );
+         client.user.setPresence({
+            "activity": {
+               "name": "ritabot.gg | !tr help",
+               "type": "PLAYING"
+            },
+            "status": "online"
+         });
 
          // ----------------------
          // All shards are online
@@ -159,7 +161,21 @@ exports.listen = function listen (client)
             if (!message.author.bot)
             {
 
-               console.log(`${message.guild.name} - ${message.guild.id} - ${message.createdAt}`);
+               // console.log(`${auth.messagedebug}`);
+               // console.log(`${process.env.MESSAGE_DEBUG}`);
+
+               if (auth.messagedebug === "1")
+               {
+
+                  console.log(`${message.guild.name} - ${message.guild.id} - ${message.createdAt} \n----------------------------------------\nDEBUG: Messsage User - ${message.author.tag} \nDEBUG: Messsage Content - ${message.content}\n----------------------------------------`);
+
+               }
+               if (auth.messagedebug !== "1")
+               {
+
+                  console.log(`${message.guild.name} - ${message.guild.id} - ${message.createdAt}`);
+
+               }
                const col = "message";
                let id = "bot";
                db.increaseStatsCount(col, id);
@@ -385,6 +401,7 @@ exports.listen = function listen (client)
             "guildJoin",
             guild
          );
+         db.servercount(guild);
          db.addServer(
             guild.id,
             config.defaultLanguage,
